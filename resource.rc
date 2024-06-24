@@ -1,0 +1,4 @@
+#include "resource.h"
+
+IDR_WAVE1   WAVE    "D:\\project\\H33PinWindow\\SetWindowOnTopUtil\\res\\beep.wav"
+IDI_ICON1   ICON    "D:\\project\\H33PinWindow\\SetWindowOnTopUtil\\res\\tempicon.ico"
