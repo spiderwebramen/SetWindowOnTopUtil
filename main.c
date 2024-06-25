@@ -6,8 +6,6 @@
 
 #include "resource.h"
 
-// #pragma comment (lib, "winmm")
-
 // TODO: unpin all windows on close
 
 #define TRAY_MSG (WM_USER + 0x100)
@@ -130,7 +128,6 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 }
 
 bool createTrayIcon() {
-	// nid = {0};
 	nid.cbSize = sizeof(nid);
 	nid.uID = 1;
 	nid.hWnd = hMainWindow;
