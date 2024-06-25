@@ -14,7 +14,7 @@ make
 ## Usage
 | Key | Description |
 |-----|-------------|
-|<kbd>⊞ Win</kbd> + <kbd>⌃ Control</kbd> + <kbd>t</kbd>| Toggle Window On Top
+|'⊞ Win' + '⌃ Control' + 't'| Toggle Window On Top
 
 To close the program, Right click the tray icon then select `Exit`
 
