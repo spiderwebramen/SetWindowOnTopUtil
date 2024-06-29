@@ -1,12 +1,13 @@
 SHELL = powershell.exe
 CFLAGS += -Wall -Wextra 
 
-all: what link
+build: link
+all: mkdir link
 
-what:
+mkdir:
 	mkdir -Force build
 link: main.o resource.o
-	gcc $(CFLAGS) -mwindows "build/main.o" "build/resource.o" -o "build/SetWindowOnTop.exe" -lwinmm
+	gcc $(CFLAGS) -mwindows "build/main.o" "build/resource.o" -o "build/SetWindowOnTop.exe" -lwinmm -ldwmapi
 main.o: main.c
 	gcc $(CFLAGS) -c main.c -o "build/main.o"
 resource.o: resource.rc resource.h
