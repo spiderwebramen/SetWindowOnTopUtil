@@ -1,5 +1,5 @@
 # SetWindowOnTopUtil
-A simple, single-executable utility for setting application window to always on top for Windows
+A simple, single-executable utility for setting an application window to always on top for Windows
 
 ## Installation / Getting Started
 ### Binaries Download
@@ -8,7 +8,7 @@ https://github.com/spiderwebramen/SetWindowOnTopUtil/releases
 ```
 git clone https://github.com/spiderwebramen/SetWindowOnTopUtil.git
 cd SetWindowOnTopUtil
-make
+make all
 ```
 
 ## Usage
