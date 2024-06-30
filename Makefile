@@ -16,4 +16,4 @@ mkdir:
 clean:
 	rm -r build/
 strip:
-	strip -s -R .comment -R .gnu.version --strip-unneeded "build/SetWindowOnTop.exe"
+	strip --strip-all "build/SetWindowOnTop.exe"

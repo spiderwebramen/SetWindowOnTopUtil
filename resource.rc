@@ -1,4 +1,4 @@
 #include "resource.h"
 
 IDR_WAVE1   WAVE    "res\\beep.wav"
-IDI_ICON1   ICON    "res\\tempicon.ico"
+IDI_ICON1   ICON    "res\\icon.ico"

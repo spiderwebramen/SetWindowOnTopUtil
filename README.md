@@ -1,5 +1,6 @@
 # SetWindowOnTopUtil
 > yoinked from [PowerToys' Always on Top](https://learn.microsoft.com/en-us/windows/powertoys/always-on-top) and make it worse xd
+
 A simple, single-executable utility for setting an application window to always on top for Windows
 
 ## Installation / Getting Started

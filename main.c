@@ -77,6 +77,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
 			showTrayContextMenu(); // TODO: handle when this shit error
 			break;
 		}
+		default: {
+			return DefWindowProc(hWnd, message, wParam, lParam);
+		}
 		}
 		break;
 	}
@@ -147,11 +150,11 @@ bool createTrayIcon() {
 	nid.cbSize = sizeof(nid);
 	nid.uID = 1;
 	nid.hWnd = hMainWindow;
-	nid.uFlags = NIF_ICON | NIF_TIP | NIF_MESSAGE;
+	nid.uFlags = NIF_ICON | NIF_MESSAGE | NIF_TIP | NIF_SHOWTIP;
 	nid.uCallbackMessage = TRAY_MSG;
 	nid.uVersion = NOTIFYICON_VERSION_4;
 	nid.hIcon = hIcon;
-	memcpy(nid.szTip, TEXT("Pin Window Util"), 32);
+	memcpy(nid.szTip, TEXT("Set Window on Top"), 36);
 
 	if (Shell_NotifyIcon(NIM_ADD, &nid)) {
 		Shell_NotifyIcon(NIM_SETVERSION, &nid);
