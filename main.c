@@ -1,8 +1,6 @@
 #define UNICODE
 #define _UNICODE
 
-#include <assert.h>
-#include <dwmapi.h>
 #include <stdbool.h>
 #include <windows.h>
 
@@ -10,29 +8,14 @@
 
 // TODO: unpin all windows on close
 
-#define BORDER_THICKNESS 3
-#define BORDER_COLOR GetSysColor(COLOR_HIGHLIGHT)
-#define TRANSPARENT_COLOR_KEY RGB(69, 69, 69)
-
 #define TRAY_MSG (WM_USER + 0x100)
 #define IDM_EXIT 100
 #define IDM_UNPINALL 101
 
 #define HKID_TOGGLEONTOP 1
-#define HKID_TEST 2
-#define HKID_TEST_QUIT 10
-
-#define TID_BORDERUPDATE 1
-#define T_BORDERUPDATE_MS 100
-
-#define PROP_ATTACHED_WINDOW TEXT("PROP_ATTACHED_WINDOW")
-#define PROP_BORDER_WINDOW TEXT("PROP_BORDER_WINDOW")
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
-LRESULT CALLBACK BorderWndProc(HWND hWnd, UINT message, WPARAM wParam,
-							   LPARAM lParam);
 bool unpinAllWindow(); // TODO: implement this shit
-bool drawBorder(HWND hWnd);
 bool toggleWindowOnTop(HWND hWnd);
 bool isWindowTopMost(HWND hWnd);
 bool createTrayIcon();
@@ -41,7 +24,6 @@ bool showTrayContextMenu();
 void msgBoxErr();
 
 LPCWSTR MAIN_CLASS_NAME = TEXT("aiyaMainClass");
-LPCWSTR BORDER_CLASS_NAME = TEXT("aiyaBorderClass");
 
 HWND hMainWindow;
 HINSTANCE hMainInstance;
@@ -64,9 +46,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
 	case WM_DESTROY: {
 		DestroyMenu(hTrayMenu);
 		UnregisterClass(MAIN_CLASS_NAME, hMainInstance);
-		UnregisterClass(BORDER_CLASS_NAME, hMainInstance);
 		UnregisterHotKey(hMainWindow, HKID_TOGGLEONTOP);
-		UnregisterHotKey(hMainWindow, HKID_TEST);
 		LocalFree(hIcon);
 		// free everything here
 		break;
@@ -83,18 +63,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
 			}
 			break;
 		}
-		case HKID_TEST: {
-			drawBorder(NULL);
-			PlaySound(MAKEINTRESOURCE(IDR_WAVE1), GetModuleHandle(NULL),
-					  SND_ASYNC | SND_NODEFAULT | SND_RESOURCE);
-			break;
+		default: {
+			return DefWindowProc(hWnd, message, wParam, lParam);
 		}
-		case HKID_TEST_QUIT: {
-			PostQuitMessage(0);
-			break;
-		}
-		default:
-			assert(0 && "unreachable");
 		}
 		break;
 	}
@@ -109,63 +80,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
 		}
 		break;
 	}
-	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
-	}
-	return 0; // TODO: properly handle each case return value
-}
-
-LRESULT CALLBACK BorderWndProc(HWND hWnd, UINT message, WPARAM wParam,
-							   LPARAM lParam) {
-	switch (message) {
-	case WM_PAINT: {
-		PAINTSTRUCT ps = {0};
-		HDC hdc = BeginPaint(hWnd, &ps);
-
-		RECT rc = {0};
-		GetClientRect(hWnd, &rc);
-
-		HPEN hPen = CreatePen(PS_SOLID, BORDER_THICKNESS, BORDER_COLOR);
-		HBRUSH hBrush = CreateSolidBrush(TRANSPARENT_COLOR_KEY);
-		HGDIOBJ hOldPen = SelectObject(hdc, hPen);
-		HGDIOBJ hOldBrush = SelectObject(hdc, hBrush);
-
-		Rectangle(hdc, rc.left, rc.top, rc.right, rc.bottom);
-
-		if (hOldPen)
-			SelectObject(hdc, hOldPen);
-		if (hOldBrush)
-			SelectObject(hdc, hOldBrush);
-		if (hPen)
-			DeleteObject(hPen);
-		if (hBrush)
-			DeleteObject(hBrush);
-
-		EndPaint(hWnd, &ps);
-		break;
-	}
-	case WM_TIMER: {
-		if (wParam == TID_BORDERUPDATE) {
-			HWND hAttachedWindow = GetProp(hWnd, PROP_ATTACHED_WINDOW);
-			RECT attached_window_rect = {0};
-			DwmGetWindowAttribute(hAttachedWindow, DWMWA_EXTENDED_FRAME_BOUNDS,
-								  &attached_window_rect,
-								  sizeof(attached_window_rect));
-			SetWindowPos(hAttachedWindow, hWnd, 0, 0, 0, 0,
-						 SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-			SetWindowPos(hWnd, 0, attached_window_rect.left,
-						 attached_window_rect.top,
-						 attached_window_rect.right - attached_window_rect.left,
-						 attached_window_rect.bottom - attached_window_rect.top,
-						 SWP_SHOWWINDOW | SWP_NOACTIVATE);
-			RedrawWindow(hWnd, NULL, NULL, RDW_INVALIDATE);
-			// TODO: free attached_window_rect
-		}
-		break;
-	}
-	// case WM_NCHITTEST:
-	// 	return HTCAPTION; // to be able to drag the window around
-	// 	break;
 	default:
 		return DefWindowProc(hWnd, message, wParam, lParam);
 	}
@@ -193,16 +107,6 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/,
 		PostQuitMessage(0);
 	}
 
-	WNDCLASS border_wc = {0};
-	border_wc.lpfnWndProc = BorderWndProc;
-	border_wc.hInstance = hMainInstance;
-	border_wc.lpszClassName = BORDER_CLASS_NAME;
-	border_wc.hIcon = hIcon;
-	if (!RegisterClass(&border_wc)) {
-		msgBoxErr(); // Fail to register border class
-		PostQuitMessage(0);
-	}
-
 	hMainWindow = CreateWindowEx(WS_EX_CLIENTEDGE, MAIN_CLASS_NAME, window_name,
 								 WS_OVERLAPPEDWINDOW, CW_USEDEFAULT,
 								 CW_USEDEFAULT, CW_USEDEFAULT, CW_USEDEFAULT,
@@ -217,20 +121,6 @@ int CALLBACK WinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/,
 	if (!RegisterHotKey(hMainWindow, HKID_TOGGLEONTOP,
 						MOD_WIN | MOD_CONTROL | MOD_NOREPEAT,
 						0x54)) { // WIN+CTRL+t
-		msgBoxErr();			 // Fail to register hotkey
-		PostQuitMessage(0);
-	}
-
-	if (!RegisterHotKey(hMainWindow, HKID_TEST,
-						MOD_WIN | MOD_CONTROL | MOD_NOREPEAT,
-						0x55)) { // WIN+CTRL+u
-		msgBoxErr();			 // Fail to register hotkey
-		PostQuitMessage(0);
-	}
-
-	if (!RegisterHotKey(hMainWindow, HKID_TEST_QUIT,
-						MOD_WIN | MOD_CONTROL | MOD_SHIFT | MOD_NOREPEAT,
-						0x51)) { // WIN+CTRL+SHIFT+q
 		msgBoxErr();			 // Fail to register hotkey
 		PostQuitMessage(0);
 	}
@@ -319,38 +209,6 @@ bool toggleWindowOnTop(HWND hWnd) {
 		return true;
 	else
 		return false;
-}
-
-bool drawBorder(HWND /*hWnd*/) {
-	HWND hBorderWindow = CreateWindowEx(
-		WS_EX_LAYERED | WS_EX_TOOLWINDOW, BORDER_CLASS_NAME, TEXT(""),
-		WS_VISIBLE | WS_POPUP, 0, 0, 0, 0, NULL, NULL, hMainInstance, NULL);
-
-	if (hBorderWindow == NULL) {
-		msgBoxErr(); // Fail to create border window
-		return false;
-	}
-
-	if (!SetLayeredWindowAttributes(hBorderWindow, TRANSPARENT_COLOR_KEY, 255,
-									LWA_COLORKEY)) {
-		msgBoxErr(); // Fail to set transparent color key
-		return false;
-	}
-
-	HWND hActiveWindow = GetForegroundWindow();
-	SetProp(hBorderWindow, PROP_ATTACHED_WINDOW, hActiveWindow);
-	SetProp(hActiveWindow, PROP_BORDER_WINDOW, hBorderWindow);
-
-	SetTimer(hBorderWindow, TID_BORDERUPDATE, T_BORDERUPDATE_MS, NULL);
-	// TODO: handle return val
-	// TODO: UOI_TIMERPROC_EXCEPTION_SUPPRESSION flag set
-	// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-settimer
-	// REMARKS
-
-	// TODO: kill timer on quit
-	// TODO: remove prop on border delete
-
-	return true;
 }
 
 bool isWindowTopMost(HWND hWnd) {
