@@ -26,6 +26,7 @@
 #define T_BORDERUPDATE_MS 100
 
 #define PROP_ATTACHED_WINDOW TEXT("PROP_ATTACHED_WINDOW")
+#define PROP_BORDER_WINDOW TEXT("PROP_BORDER_WINDOW")
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK BorderWndProc(HWND hWnd, UINT message, WPARAM wParam,
@@ -62,8 +63,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam,
 	}
 	case WM_DESTROY: {
 		DestroyMenu(hTrayMenu);
-		UnregisterClass(TEXT("mudhumyai"), hMainInstance);
-		UnregisterClass(TEXT("mudhumlek"), hMainInstance);
+		UnregisterClass(MAIN_CLASS_NAME, hMainInstance);
+		UnregisterClass(BORDER_CLASS_NAME, hMainInstance);
 		UnregisterHotKey(hMainWindow, HKID_TOGGLEONTOP);
 		UnregisterHotKey(hMainWindow, HKID_TEST);
 		LocalFree(hIcon);
@@ -338,6 +339,7 @@ bool drawBorder(HWND /*hWnd*/) {
 
 	HWND hActiveWindow = GetForegroundWindow();
 	SetProp(hBorderWindow, PROP_ATTACHED_WINDOW, hActiveWindow);
+	SetProp(hActiveWindow, PROP_BORDER_WINDOW, hBorderWindow);
 
 	SetTimer(hBorderWindow, TID_BORDERUPDATE, T_BORDERUPDATE_MS, NULL);
 	// TODO: handle return val
@@ -345,6 +347,7 @@ bool drawBorder(HWND /*hWnd*/) {
 	// https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-settimer
 	// REMARKS
 
+	// TODO: kill timer on quit
 	// TODO: remove prop on border delete
 
 	return true;
