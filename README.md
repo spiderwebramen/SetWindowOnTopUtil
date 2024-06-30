@@ -1,4 +1,5 @@
 # SetWindowOnTopUtil
+> yoinked from [PowerToys' Always on Top](https://learn.microsoft.com/en-us/windows/powertoys/always-on-top) and make it worse xd
 A simple, single-executable utility for setting an application window to always on top for Windows
 
 ## Installation / Getting Started
@@ -14,7 +15,7 @@ make all
 ## Usage
 | Key | Description |
 |-----|-------------|
-|`⊞ Win` + `⌃ Control` + `t`| Toggle Window On Top
+|`⊞ Win` + `⌃ Control` + `T`| Toggle Window On Top
 
 To close the program, Right click the tray icon then select `Exit`
 
